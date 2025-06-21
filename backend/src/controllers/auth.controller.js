@@ -48,6 +48,9 @@ export const signup = async (req, res) => {
       res.status(400).json({ message: "Invalid User Data!" });
     }
   } catch (error) {
+    if (error.code === 11000 && error.keyPattern && error.keyPattern.username) {
+      return res.status(400).json({ message: "Username is already taken." });
+    }
     console.log("Error in Signup Controller", error.message);
     res.status(500).json({ message: "Signup Failed, Internal Server Error!" });
   }
