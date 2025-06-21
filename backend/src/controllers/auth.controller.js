@@ -1,3 +1,4 @@
+import cloudinary from "../lib/cloudinary.js";
 import { generateToken } from "../lib/utils.js";
 import User from "../models/user.model.js";
 import bcrypt from "bcryptjs";
@@ -52,10 +53,87 @@ export const signup = async (req, res) => {
   }
 };
 
-export const login = (req, res) => {
-  res.send("Login Route");
+export const login = async (req, res) => {
+  const { email, password } = req.body;
+  try {
+    const user = await User.findOne({ email });
+
+    if (!user) {
+      return res.status(404).json({ message: "Invalid Credentials!" });
+    }
+
+    const isPasswordCorrect = await bcrypt.compare(password, user.password);
+
+    if (!isPasswordCorrect) {
+      return res.status(404).json({ message: "Invalid Credentials!" });
+    }
+
+    generateToken(user._id, res);
+    res.status(200).json({
+      _id: user._id,
+      email: user.email,
+      fullName: user.fullName,
+      username: user.username,
+      profilePic: user.profilePic,
+    });
+  } catch (error) {
+    console.log("Error in Login Controller", error.message);
+    res.status(500).json({ message: "Internal Server Error" });
+  }
 };
 
-export const logout = (req, res) => {
-  res.send("Logout Route");
+export const logout = async (req, res) => {
+  try {
+    res.cookie("jwt", "", { maxAge: 0 });
+    res.status(200).json({ message: "Successfully Logged Out!" });
+  } catch (error) {
+    res.status(500).json({ message: "Internal Server Error" });
+  }
+};
+
+export const updateProfile = async (req, res) => {
+  try {
+    const { fullName, username, profilePic } = req.body;
+    const userId = req.user._id;
+
+    const updates = {};
+    if (fullName) updates.fullName = fullName;
+    if (username) updates.username = username;
+
+    if (profilePic) {
+      const uploadedResponse = await cloudinary.uploader.upload(profilePic);
+      updates.profilePic = uploadedResponse.secure_url;
+    }
+
+    if (Object.keys(updates).length === 0) {
+      return res.status(400).json({ message: "No Data to Update" });
+    }
+
+    const updatedUser = await User.findByIdAndUpdate(
+      userId,
+      { $set: updates },
+      { new: true, runValidators: true }
+    ).select("-password");
+
+    if (!updatedUser) {
+      return res.status(404).json({ message: "User Not Found!" });
+    }
+
+    res.status(200).json(updatedUser);
+  } catch (error) {
+    if (error.code === 11000 && error.keyPattern && error.keyPattern.username) {
+      return res.status(400).json({ message: "Username is already taken." });
+    }
+    console.log("Error in Profile Update!", error);
+    res.status(500).json({ message: "Internal Server Error" });
+  }
+};
+
+export const checkAuth = (req, res) => {
+  try {
+    res.status(200).json(req.user);
+  } catch (error) {
+    console.log("Error in checkAuth controller: ", error.message);
+    res.status(500).json({ message: "Internal Server Error" });
+  }
 };
