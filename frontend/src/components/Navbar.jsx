@@ -1,9 +1,14 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useAuthStore } from "../store/useAuthStore.js";
-import { LogOut, MessageSquare, Settings, User, Menu } from "lucide-react"; // Imported Menu icon
+import { LogOut, Settings, User, Menu, MessageSquareHeart } from "lucide-react";
 
 const Navbar = () => {
   const { logout, authUser } = useAuthStore();
+  const navigate = useNavigate();
+  const handleLogout = async () => {
+    await logout();
+    navigate("/login");
+  };
   return (
     <>
       <header className="fixed top-0 z-40 w-full border-b bg-base-100 border-base-300 backdrop-blur-lg bg-base-100/80">
@@ -14,7 +19,7 @@ const Navbar = () => {
               className="flex items-center gap-2.5 hover:opacity-80 transition-all"
             >
               <div className="flex items-center justify-center rounded-lg size-9 bg-primary/10">
-                <MessageSquare className="w-5 h-5 text-primary" />
+                <MessageSquareHeart className="w-5 h-5 text-primary" />
               </div>
               <h1 className="text-lg font-bold">ZUNO</h1>
             </Link>
@@ -36,7 +41,7 @@ const Navbar = () => {
                         <Link to="/profile">Profile</Link>
                       </li>
                       <li>
-                        <button onClick={logout}>Logout</button>
+                        <button onClick={handleLogout}>Logout</button>
                       </li>
                     </>
                   )}
@@ -69,7 +74,7 @@ const Navbar = () => {
               </span>
             </Link>
             <button
-              onClick={logout}
+              onClick={handleLogout}
               className="flex items-center p-2 transition-colors rounded-lg hover:bg-base-200"
             >
               <LogOut className="size-5 shrink-0" />
