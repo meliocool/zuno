@@ -10,20 +10,26 @@ import { useAuthStore } from "./store/useAuthStore";
 import { Loader2 } from "lucide-react";
 import { Toaster } from "react-hot-toast";
 import { useThemeStore } from "./store/useThemeStore";
+import useFriendRequestStore from "./store/useFriendRequestStore";
 
 const App = () => {
   const { authUser, checkAuth, isCheckingAuth } = useAuthStore();
   const { theme } = useThemeStore();
+  const { fetchRequests } = useFriendRequestStore();
 
   useEffect(() => {
     checkAuth();
   }, [checkAuth]);
 
   useEffect(() => {
+    if (authUser) {
+      fetchRequests();
+    }
+  }, [authUser, fetchRequests]);
+
+  useEffect(() => {
     document.documentElement.setAttribute("data-theme", theme);
   }, [theme]);
-
-  console.log({ authUser });
 
   if (isCheckingAuth && !authUser) {
     return (
