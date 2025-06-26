@@ -2,6 +2,8 @@ import { create } from "zustand";
 import { axiosInstance } from "../lib/axios";
 import toast from "react-hot-toast";
 import { io } from "socket.io-client";
+import useFriendRequestStore from "./useFriendRequestStore";
+import { useChatStore } from "./useChatStore";
 
 const BASE_URL = "http://localhost:5001";
 
@@ -87,8 +89,24 @@ export const useAuthStore = create((set, get) => ({
         userId: authUser._id,
       },
     });
+
+    const { addRequest } = useFriendRequestStore.getState();
+    const { addFriend } = useChatStore.getState();
+
     socket.connect();
     set({ socket: socket });
+
+    socket.on("newFriendRequest", (newRequestData) => {
+      addRequest(newRequestData);
+      toast.success(
+        `New friend request from ${newRequestData.requester.username}!`
+      );
+    });
+
+    socket.on("friendRequestAccepted", (newFriendData) => {
+      addFriend(newFriendData);
+      toast.success(`${newFriendData.fullName} is now your homie!`);
+    });
 
     socket.on("getOnlineUsers", (userIds) => {
       set({ onlineUsers: userIds });

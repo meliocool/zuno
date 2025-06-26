@@ -1,3 +1,4 @@
+import { getReceiverSocketId, io } from "../lib/socket.js";
 import Friendship from "../models/friendship.model.js";
 import User from "../models/user.model.js";
 
@@ -33,6 +34,15 @@ export const sendFriendRequest = async (req, res) => {
     });
 
     await newFriendship.save();
+
+    const recipientSocketId = getReceiverSocketId(recipientId);
+    if (recipientSocketId) {
+      const requestWithUserData = await Friendship.findById(
+        newFriendship._id
+      ).populate("requester", "fullName profilePic username");
+
+      io.to(recipientSocketId).emit("newFriendRequest", requestWithUserData);
+    }
 
     res.status(201).json({
       message: "Friend request sent successfully!",
@@ -72,6 +82,26 @@ export const respondFriendRequest = async (req, res) => {
 
     friendship.status = response;
     await friendship.save();
+
+    if (response === "accepted") {
+      const requesterId = friendship.requester;
+
+      const requesterData = await User.findById(requesterId).select(
+        "-password"
+      );
+      const recipientData = await User.findById(loggedInUserId).select(
+        "-password"
+      );
+
+      const requesterSocketId = getReceiverSocketId(requesterId.toString());
+      if (requesterSocketId) {
+        io.to(requesterSocketId).emit("friendRequestAccepted", recipientData);
+      }
+      const recipientSocketId = getReceiverSocketId(loggedInUserId.toString());
+      if (recipientSocketId) {
+        io.to(recipientSocketId).emit("friendRequestAccepted", requesterData);
+      }
+    }
     res
       .status(200)
       .json({ message: `Friend request: ${response}`, friendship });

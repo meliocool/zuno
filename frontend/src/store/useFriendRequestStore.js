@@ -20,7 +20,6 @@ const useFriendRequestStore = create((set) => ({
   respondToRequest: async (friendshipId, response) => {
     try {
       await axiosInstance.put(`/friends/respond/${friendshipId}`, { response });
-
       toast.success(`Request ${response}!`);
       set((state) => ({
         requests: state.requests.filter((r) => r._id !== friendshipId),
@@ -29,6 +28,13 @@ const useFriendRequestStore = create((set) => ({
       const errorMessage = error.response?.data?.error || "Action failed.";
       toast.error(errorMessage);
     }
+  },
+  addRequest: (newRequest) => {
+    set((state) => ({
+      requests: state.requests.some((r) => r._id === newRequest._id)
+        ? state.requests
+        : [...state.requests, newRequest],
+    }));
   },
 }));
 

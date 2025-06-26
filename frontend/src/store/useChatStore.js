@@ -21,6 +21,19 @@ export const useChatStore = create((set, get) => ({
       set({ isUsersLoading: false });
     }
   },
+
+  addFriend: (newFriend) => {
+    set((state) => {
+      const isAlreadyFriend = state.users.some(
+        (user) => user._id === newFriend._id
+      );
+      if (isAlreadyFriend) {
+        return {};
+      }
+      return { users: [...state.users, newFriend] };
+    });
+  },
+
   getMessages: async (userId) => {
     set({ isMessagesLoading: true });
     try {
@@ -32,6 +45,7 @@ export const useChatStore = create((set, get) => ({
       set({ isMessagesLoading: false });
     }
   },
+
   sendMessage: async (messageData) => {
     const { selectedUser, messages } = get();
     try {
@@ -44,6 +58,7 @@ export const useChatStore = create((set, get) => ({
       toast.error(error.response.data.message);
     }
   },
+
   subscribeToMessages: () => {
     const { selectedUser } = get();
     if (!selectedUser) return;
