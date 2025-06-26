@@ -3,16 +3,22 @@ import { useChatStore } from "../store/useChatStore";
 import SidebarSkeleton from "./skeletons/SidebarSkeleton";
 import { Users } from "lucide-react";
 import { useAuthStore } from "../store/useAuthStore";
+import { useState } from "react";
 
 const Sidebar = () => {
   const { getUsers, users, selectedUser, setSelectedUser, isUsersLoading } =
     useChatStore();
 
   const { onlineUsers } = useAuthStore();
+  const [showOnlineOnly, setShowOnlineOnly] = useState(false);
 
   useEffect(() => {
     getUsers();
   }, [getUsers]);
+
+  const filteredUsers = showOnlineOnly
+    ? users.filter((user) => onlineUsers.includes(user._id))
+    : users;
 
   if (isUsersLoading) return <SidebarSkeleton />;
 
@@ -21,12 +27,25 @@ const Sidebar = () => {
       <div className="w-full p-5 border-b border-base-300">
         <div className="flex items-center gap-2">
           <Users className="size-6" />
-          <span className="hidden font-medium lg:block">Contacts</span>
+          <span className="hidden font-medium lg:block">Friends</span>
         </div>
-        {/* TODO: Online Filter Toggle */}
+        <div className="items-center hidden gap-2 mt-3 lg:flex">
+          <label className="flex items-center gap-2 cursor-pointer">
+            <input
+              type="checkbox"
+              checked={showOnlineOnly}
+              onChange={(e) => setShowOnlineOnly(e.target.checked)}
+              className="checkbox checkbox-sm"
+            />
+            <span className="text-sm">Show Online Friends</span>
+          </label>
+          <span className="text-xs text-zinc-500">
+            ({onlineUsers.length - 1} online)
+          </span>
+        </div>
       </div>
       <div className="w-full py-3 overflow-y-auto">
-        {users.map((user) => (
+        {filteredUsers.map((user) => (
           <button
             key={user._id}
             onClick={() => setSelectedUser(user)}
@@ -58,6 +77,11 @@ const Sidebar = () => {
             </div>
           </button>
         ))}
+        {filteredUsers.length === 0 && (
+          <div className="py-4 text-center text-zinc-500">
+            Your Friends are all Busy!
+          </div>
+        )}
       </div>
     </aside>
   );

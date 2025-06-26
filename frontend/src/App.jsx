@@ -13,12 +13,14 @@ import { useThemeStore } from "./store/useThemeStore";
 import useFriendRequestStore from "./store/useFriendRequestStore";
 
 const App = () => {
-  const { authUser, checkAuth, isCheckingAuth } = useAuthStore();
+  const { authUser, checkAuth, isCheckingAuth, onlineUsers } = useAuthStore();
   const { theme } = useThemeStore();
   const { fetchRequests } = useFriendRequestStore();
 
+  console.log(onlineUsers);
+
   useEffect(() => {
-    checkAuth();
+    checkAuth(); // This shit runs twice in development
   }, [checkAuth]);
 
   useEffect(() => {

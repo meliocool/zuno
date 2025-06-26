@@ -38,9 +38,7 @@ const FriendRequestsModal = ({ isOpen, onClose }) => {
                   <div className="avatar">
                     <div className="w-10 rounded-full">
                       <img
-                        src={
-                          request.requester.profilePic || "/default-avatar.png"
-                        }
+                        src={request.requester.profilePic || "/avatar.png"}
                         alt="avatar"
                       />
                     </div>
