@@ -1,6 +1,6 @@
 # ZUNO 💬
 
-ZUNO is a real-time chatting web application that allows users to send text and image messages instantly. Built using the **MERN Stack**, ZUNO leverages **Socket.IO** for real-time communication and **MongoDB** as its database. It features a sleek UI designed with **Tailwind CSS** and **daisyUI**.
+ZUNO is a real-time chatting web application that allows users to send text and image messages instantly to their homies. Built using the **MERN Stack**, ZUNO leverages **Socket.IO** for real-time communication and **MongoDB** as its database. It features a sleek UI designed with **Tailwind CSS** and **daisyUI**.
 
 ---
 
@@ -26,4 +26,3 @@ ZUNO is a real-time chatting web application that allows users to send text and 
 - 👤 Profile management and settings
 
 ---
-
